@@ -37,13 +37,13 @@ namespace ILGPU_ML
                 activation += trainingInput[k] * LayerWeights[k, j];
             }
 
-            LayerData[j] = Utils.sigmoid(activation);
+            LayerData[j] = Utils.lrelu(activation);
         }
 
         public void FirstBackwardPass(int j, ArrayView1D<float, Stride1D.Dense> errorOutput, ArrayView1D<float, Stride1D.Dense> trainingOutput)
         {
             float error = (trainingOutput[j] - LayerData[j]);
-            errorOutput[j] = error * Utils.dSigmoid(LayerData[j]);
+            errorOutput[j] = error * Utils.dlrelu(LayerData[j]);
         }
 
         public void OtherBackwardPass(int j, ArrayView1D<float, Stride1D.Dense> errorOutput, ArrayView1D<float, Stride1D.Dense> trainingOutput, ArrayView2D<float, Stride2D.DenseY> outputWeights)
@@ -55,7 +55,7 @@ namespace ILGPU_ML
                 error += trainingOutput[k] * outputWeights[j, k];
             }
 
-            errorOutput[j] = error * Utils.dSigmoid(LayerData[j]);
+            errorOutput[j] = error * Utils.dlrelu(LayerData[j]);
         }
 
         public void BackPropogation(int j, ArrayView1D<float, Stride1D.Dense> outputError, ArrayView1D<float, Stride1D.Dense> inputLayerData, float learningWeight)
@@ -149,7 +149,7 @@ namespace ILGPU_ML
                     activation += trainingInput[k] * LayerWeights[k][j];
                 }
 
-                LayerData[j] = Utils.sigmoid(activation);
+                LayerData[j] = Utils.lrelu(activation);
             }
         }
 
@@ -158,7 +158,7 @@ namespace ILGPU_ML
             for (int j = 0; j < layerSize; j++)
             {
                 float error = (trainingOutput[j] - LayerData[j]);
-                LayerError[j] = error * Utils.dSigmoid(LayerData[j]);
+                LayerError[j] = error * Utils.dlrelu(LayerData[j]);
             }
 
             return LayerError;
@@ -175,7 +175,7 @@ namespace ILGPU_ML
                     error += trainingOutput[k] * outputWeights[j][k];
                 }
 
-                LayerError[j] = error * Utils.dSigmoid(LayerData[j]);
+                LayerError[j] = error * Utils.dlrelu(LayerData[j]);
             }
 
             return LayerError;

@@ -8,6 +8,17 @@ namespace ILGPU_ML
 {
     public static class Utils
     {
+
+        public static float lrelu(float x)
+        {
+            return (x > 0) ? x : 0.01f * x;
+        }
+
+        public static float dlrelu(float x)
+        {
+            return (x > 0) ? 1.0f : 0.01f;
+        }
+
         public static float sigmoid(float x)
         {
             return 1f / (1f + MathF.Exp(-x));
@@ -40,6 +51,23 @@ namespace ILGPU_ML
                 array[n] = array[k];
                 array[k] = temp;
             }
+        }
+
+        public static int GetIndexOfMax(float[] data)
+        {
+            int currentMaxIndex = 0;
+            float currentMax = data[0];
+
+            for(int i = 0; i < data.Length; i++)
+            {
+                if(currentMax < data[i])
+                {
+                    currentMaxIndex = i;
+                    currentMax = data[i];
+                }
+            }
+
+            return currentMaxIndex;
         }
 
         internal static T[][] ToJaggedArray<T>(T[,] source)

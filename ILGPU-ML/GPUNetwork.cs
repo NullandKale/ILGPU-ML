@@ -86,6 +86,12 @@ namespace ILGPU_ML
             layers.Add(layer);
         }
 
+        public void Train(bool GPU, float[] trainingInput, float[] trainingOutput, float learningWeight)
+        {
+            ForwardPassProcess(GPU, trainingInput);
+            BackwardPassProcess(GPU, trainingInput, trainingOutput, learningWeight);
+        }
+
         public void Train(bool GPU, float[][] trainingInput, float[][] trainingOutput, float learningWeight)
         {
             int[] trainingOrder = Utils.GenerateTrainingOrder(trainingInput.Length);

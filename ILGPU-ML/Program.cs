@@ -1,10 +1,75 @@
-﻿namespace ILGPU_ML
+﻿using System.Diagnostics;
+
+namespace ILGPU_ML
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            XorSample();
+            //XorSample();
+            MnistSample();
+        }
+
+        static void MnistSample()
+        {
+            Console.WriteLine("Loading Mnist Dataset");
+            
+            List<(float[] data, float[] label)> trainingData = MnistReader.ReadTrainingData();
+            Console.WriteLine($"Loaded {trainingData.Count} training sets.");
+
+            List<(float[] data, float[] label)> testData = MnistReader.ReadTestData();
+            Console.WriteLine($"Loaded {testData.Count} testing sets.");
+
+            Network dNetwork = new Network(false, 1337);
+            dNetwork.AddInputLater(trainingData[0].data.Length, trainingData[0].data.Length);
+            dNetwork.AddLayer(200);
+            dNetwork.AddLayer(30);
+            dNetwork.AddLayer(trainingData[0].label.Length);
+
+            Console.WriteLine("Networks Initalized");
+
+            float learningRate = 0.01f;
+            int numberOfEpochs = 20;
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            int[] trainingOrder = Utils.GenerateTrainingOrder(trainingData.Count);
+            Random rng = new Random();
+
+            for (int epoch = 0; epoch < numberOfEpochs; epoch++)
+            {
+                Utils.Shuffle(rng, trainingOrder);
+                for (int x = 0; x < trainingData.Count; x++)
+                {
+                    int i = trainingOrder[x];
+                    dNetwork.Train(true, trainingData[i].data, trainingData[i].label, learningRate);
+                }
+                Console.WriteLine($"GPU Epoch {epoch} done.");
+            }
+
+            Console.WriteLine($"GPU Network done in: {timer.Elapsed.TotalSeconds}");
+
+            int dNetworkCorrectCounter = 0;
+
+            for (int i = 0; i < testData.Count; i++)
+            {
+                dNetwork.ForwardPassProcess(true, testData[i].data, true);
+
+                int expectedOutput = Utils.GetIndexOfMax(testData[i].label);
+                int dNetworkOutput = Utils.GetIndexOfMax(dNetwork.layers.Last().LayerData);
+
+                if(dNetworkOutput == expectedOutput)
+                {
+                    dNetworkCorrectCounter++;
+                }
+
+                //Console.WriteLine("GPU Network | Output: " + dNetworkOutput + " Expected: " + expectedOutput);
+                //Console.WriteLine();
+            }
+
+            Console.WriteLine($"GPU Network | {(float)dNetworkCorrectCounter / testData.Count}");
+            Console.WriteLine();
+
         }
 
         static void XorSample()
