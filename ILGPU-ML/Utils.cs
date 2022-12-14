@@ -8,6 +8,32 @@ namespace ILGPU_ML
 {
     public static class Utils
     {
+        public static float Activate(float x, int method)
+        {
+            switch(method)
+            {
+                case 0:
+                    return lrelu(x);
+                case 1:
+                    return sigmoid(x);
+            }
+
+            return sigmoid(x);
+        }
+
+        public static float dActivate(float x, int method)
+        {
+            switch (method)
+            {
+                case 0:
+                    return dlrelu(x);
+                case 1:
+                    return dSigmoid(x);
+            }
+
+            return dSigmoid(x);
+        }
+
 
         public static float lrelu(float x)
         {

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>ILGPU_ML</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILGPU" Version="1.3.0" />
-    <PackageReference Include="ILGPU.Algorithms" Version="1.3.0" />
+    <ProjectReference Include="..\ILGPU-ML\ILGPU-ML.csproj" />
   </ItemGroup>
 
 </Project>

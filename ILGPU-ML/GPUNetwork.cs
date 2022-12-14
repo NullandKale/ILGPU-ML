@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ILGPU_ML
 {
-    public class Network
+    public class Network : IDisposable
     {
         public Context context;
         public Accelerator device;
@@ -28,7 +28,6 @@ namespace ILGPU_ML
 
         private Random rng = new Random();
 
-
         public Network(bool debug, int seed = -1)
         {
             if(seed != -1)
@@ -40,7 +39,7 @@ namespace ILGPU_ML
                 rng = new Random();
             }
 
-            context = Context.Create(builder => builder.CPU().Cuda().EnableAlgorithms());
+            context = Context.Create(builder => builder.CPU().Cuda().EnableAlgorithms().Optimize(debug ? OptimizationLevel.Debug : OptimizationLevel.O1));
             device = context.GetPreferredDevice(preferCPU: debug)
                                       .CreateAccelerator(context);
             layers = new List<Layer>();
@@ -97,12 +96,50 @@ namespace ILGPU_ML
             int[] trainingOrder = Utils.GenerateTrainingOrder(trainingInput.Length);
             Utils.Shuffle(rng, trainingOrder);
 
-            for(int x = 0; x < trainingOrder.Length; x++)
+            for (int x = 0; x < trainingOrder.Length; x++)
             {
                 int i = trainingOrder[x];
 
                 ForwardPassProcess(GPU, trainingInput[i]);
                 BackwardPassProcess(GPU, trainingInput[i], trainingOutput[i], learningWeight);
+            }
+        }
+
+        public void TrainGPUWithPreloadedData(MemoryBuffer1D<float, Stride1D.Dense>[] trainingData, MemoryBuffer1D<float, Stride1D.Dense>[] trainingOutputData, float learningWeight)
+        {
+            int[] trainingOrder = Utils.GenerateTrainingOrder(trainingData.Length);
+            Utils.Shuffle(rng, trainingOrder);
+
+            for(int x = 0; x < trainingData.Length; x++)
+            {
+                int i = trainingOrder[x];
+
+                ForwardPassProcessWithPreloaded(trainingData[i]);
+                BackwardPassProcessWithPreloaded(trainingData[i], trainingOutputData[i], learningWeight);
+            }
+        }
+
+        public void ForwardPassProcessWithPreloaded(MemoryBuffer1D<float, Stride1D.Dense> input, bool copyToCPU = false)
+        {
+            Layer layer0 = layers[0];
+            ForwardPassKernel(layer0.inputSize, input, layer0.GetDLayer());
+
+            for (int i = 1; i < layers.Count; i++)
+            {
+                Layer layer1 = layers[i];
+                ForwardPassKernel(layer1.layerSize, layer0.dLayerData, layer1.GetDLayer());
+
+                layer0 = layers[i];
+            }
+
+            device.Synchronize();
+
+            if (copyToCPU)
+            {
+                for (int i = 0; i < layers.Count; i++)
+                {
+                    layers[i].CopyBackLayerData();
+                }
             }
         }
 
@@ -120,17 +157,18 @@ namespace ILGPU_ML
                     Layer layer1 = layers[i];
                     ForwardPassKernel(layer1.layerSize, layer0.dLayerData, layer1.GetDLayer());
 
-                    if (copyToCPU)
-                    {
-                        device.Synchronize();
-                        layer0.CopyBackDeviceBuffers();
-                        layer1.CopyBackDeviceBuffers();
-                    }
-
                     layer0 = layers[i];
                 }
 
                 device.Synchronize();
+
+                if (copyToCPU)
+                {
+                    for (int i = 0; i < layers.Count; i++)
+                    {
+                        layers[i].CopyBackLayerData();
+                    }
+                }
             }
             else
             {
@@ -144,6 +182,41 @@ namespace ILGPU_ML
                     layer0 = layers[i];
                 }
             }
+        }
+
+        private void BackwardPassProcessWithPreloaded(MemoryBuffer1D<float, Stride1D.Dense> trainingInput, MemoryBuffer1D<float, Stride1D.Dense> trainingOutput, float learningWeight)
+        {
+            MemoryBuffer1D<float, Stride1D.Dense>[] errors = new MemoryBuffer1D<float, Stride1D.Dense>[layers.Count];
+
+            for (int i = 0; i < layers.Count; i++)
+            {
+                errors[i] = layers[i].dLayerError;
+            }
+
+            FirstBackwardPassKernel(layers[layers.Count - 1].layerSize, trainingOutput, errors[layers.Count - 1], layers[layers.Count - 1].GetDLayer());
+
+            for (int i = layers.Count - 2; i >= 0; i--)
+            {
+                OtherBackwardPassKernel(layers[i].layerSize, errors[i], errors[i + 1], layers[i].GetDLayer(), layers[i + 1].GetDLayer());
+            }
+
+            for (int i = layers.Count - 1; i >= 0; i--)
+            {
+                MemoryBuffer1D<float, Stride1D.Dense> layerData;
+
+                if (i == 0)
+                {
+                    layerData = trainingInput;
+                }
+                else
+                {
+                    layerData = layers[i - 1].dLayerData;
+                }
+
+                BackPropogationKernel(layers[i].layerSize, errors[i], layerData, layers[i].GetDLayer(), learningWeight);
+            }
+
+            device.Synchronize();
         }
 
         private void BackwardPassProcess(bool GPU, float[] trainingInput, float[] trainingOutput, float learningWeight)
@@ -232,6 +305,17 @@ namespace ILGPU_ML
         private static void BackPropogation(Index1D index, ArrayView1D<float, Stride1D.Dense> error, ArrayView1D<float, Stride1D.Dense> input, dLayer layer, float learningWeight)
         {
             layer.BackPropogation(index, error, input, learningWeight);
+        }
+
+        public void Dispose()
+        {
+            for(int i = 0; i < layers.Count; i++)
+            {
+                layers[i].Dispose();
+            }
+
+            device.Dispose();
+            context.Dispose();
         }
     }
 }

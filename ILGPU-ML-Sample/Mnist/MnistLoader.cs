@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,7 +53,7 @@ namespace ILGPU_ML
 
                 for(int j = 0; j < bytes.Length; j++)
                 {
-                    floatData[j] = (((float)bytes[j]) - (255f / 2f)) / 255f;
+                    floatData[j] = (((float)bytes[j]) - (127.5f)) / 127.5f;
                 }
 
                 for(int j = 0; j < 10; j++)
@@ -63,7 +64,7 @@ namespace ILGPU_ML
                     }
                     else
                     {
-                        labelData[j] = -1;
+                        labelData[j] = 0.01f;
                     }
                 }
 
@@ -81,17 +82,6 @@ namespace ILGPU_ML
             var bytes = br.ReadBytes(sizeof(Int32));
             if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
             return BitConverter.ToInt32(bytes, 0);
-        }
-
-        public static void ForEach<T>(this T[,] source, Action<int, int> action)
-        {
-            for (int w = 0; w < source.GetLength(0); w++)
-            {
-                for (int h = 0; h < source.GetLength(1); h++)
-                {
-                    action(w, h);
-                }
-            }
         }
     }
 }

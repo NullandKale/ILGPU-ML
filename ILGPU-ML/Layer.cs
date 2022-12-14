@@ -1,5 +1,6 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
+using System.Diagnostics;
 
 namespace ILGPU_ML
 {
@@ -7,6 +8,7 @@ namespace ILGPU_ML
     {
         public int inputSize;
         public int layerSize;
+        public int activationMethod = 1;
 
         public ArrayView2D<float, Stride2D.DenseY> LayerWeights;
         public ArrayView1D<float, Stride1D.Dense> LayerData;
@@ -37,13 +39,13 @@ namespace ILGPU_ML
                 activation += trainingInput[k] * LayerWeights[k, j];
             }
 
-            LayerData[j] = Utils.lrelu(activation);
+            LayerData[j] = Utils.Activate(activation, activationMethod);
         }
 
         public void FirstBackwardPass(int j, ArrayView1D<float, Stride1D.Dense> errorOutput, ArrayView1D<float, Stride1D.Dense> trainingOutput)
         {
             float error = (trainingOutput[j] - LayerData[j]);
-            errorOutput[j] = error * Utils.dlrelu(LayerData[j]);
+            errorOutput[j] = error * Utils.dActivate(LayerData[j], activationMethod);
         }
 
         public void OtherBackwardPass(int j, ArrayView1D<float, Stride1D.Dense> errorOutput, ArrayView1D<float, Stride1D.Dense> trainingOutput, ArrayView2D<float, Stride2D.DenseY> outputWeights)
@@ -55,7 +57,7 @@ namespace ILGPU_ML
                 error += trainingOutput[k] * outputWeights[j, k];
             }
 
-            errorOutput[j] = error * Utils.dlrelu(LayerData[j]);
+            errorOutput[j] = error * Utils.Activate(LayerData[j], activationMethod);
         }
 
         public void BackPropogation(int j, ArrayView1D<float, Stride1D.Dense> outputError, ArrayView1D<float, Stride1D.Dense> inputLayerData, float learningWeight)
@@ -73,7 +75,9 @@ namespace ILGPU_ML
     {
         public int inputSize;
         public int layerSize;
+        public int activationMethod = 1;
 
+        public float[,] LayerWeights2D;
         public float[][] LayerWeights;
         public float[] LayerData;
         public float[] LayerBias;
@@ -95,6 +99,7 @@ namespace ILGPU_ML
                 LayerWeights[i] = new float[size];
             }
 
+            LayerWeights2D = new float[input, size];
             LayerData = new float[size];
             LayerBias = new float[size];
             LayerError = new float[size];
@@ -108,9 +113,15 @@ namespace ILGPU_ML
             dLayerError = device.Allocate1D(LayerError);
         }
 
+        public void CopyBackLayerData()
+        {
+            dLayerData.CopyToCPU(LayerData);
+        }
+
         public void CopyBackDeviceBuffers()
         {
-            LayerWeights = Utils.ToJaggedArray(dLayerWeights.GetAsArray2D());
+            dLayerWeights.CopyToCPU(LayerWeights2D);
+            //LayerWeights = Utils.ToJaggedArray(dLayerWeights.GetAsArray2D());
             dLayerData.CopyToCPU(LayerData);
             dLayerBias.CopyToCPU(LayerBias);
             dLayerError.CopyToCPU(LayerError);
@@ -149,7 +160,7 @@ namespace ILGPU_ML
                     activation += trainingInput[k] * LayerWeights[k][j];
                 }
 
-                LayerData[j] = Utils.lrelu(activation);
+                LayerData[j] = Utils.Activate(activation, activationMethod);
             }
         }
 
@@ -158,7 +169,7 @@ namespace ILGPU_ML
             for (int j = 0; j < layerSize; j++)
             {
                 float error = (trainingOutput[j] - LayerData[j]);
-                LayerError[j] = error * Utils.dlrelu(LayerData[j]);
+                LayerError[j] = error * Utils.dActivate(LayerData[j], activationMethod);
             }
 
             return LayerError;
@@ -175,7 +186,7 @@ namespace ILGPU_ML
                     error += trainingOutput[k] * outputWeights[j][k];
                 }
 
-                LayerError[j] = error * Utils.dlrelu(LayerData[j]);
+                LayerError[j] = error * Utils.dActivate(LayerData[j], activationMethod);
             }
 
             return LayerError;
