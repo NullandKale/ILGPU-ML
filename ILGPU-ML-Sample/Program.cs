@@ -1,5 +1,10 @@
-﻿using ILGPU_ML.Mnist;
-using ILGPU_ML.Xor;
+﻿using ILGPU.Runtime;
+using ILGPU;
+using ILGPU.Runtime.CPU;
+using ILGPU.Runtime.Cuda;
+using ILGPU_ML.VirtualMemory;
+using ILGPU_ML.Mnist;
+using ILGPU_ML.MatrixTests;
 
 namespace ILGPU_ML
 {
@@ -8,7 +13,14 @@ namespace ILGPU_ML
         static void Main(string[] args)
         {
             //XorNetwork.Run();
-            MnistNetwork.Run();
+            //MnistNetwork.Run();
+            while (true)
+            {
+                VMSample.Run();
+
+            }
+
+            //MatrixTestSample.Run();
         }
     }
 }

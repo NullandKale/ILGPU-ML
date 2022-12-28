@@ -105,9 +105,15 @@ namespace ILGPU_ML
             }
         }
 
+        int[] trainingOrder;
+
         public void TrainGPUWithPreloadedData(MemoryBuffer1D<float, Stride1D.Dense>[] trainingData, MemoryBuffer1D<float, Stride1D.Dense>[] trainingOutputData, float learningWeight)
         {
-            int[] trainingOrder = Utils.GenerateTrainingOrder(trainingData.Length);
+            if(trainingOrder == null)
+            {
+                trainingOrder = Utils.GenerateTrainingOrder(trainingData.Length);
+            }
+
             Utils.Shuffle(rng, trainingOrder);
 
             for(int x = 0; x < trainingData.Length; x++)

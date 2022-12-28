@@ -17,15 +17,15 @@ namespace ILGPU_ML.Mnist
             Console.WriteLine($"Loaded {testData.Count} testing sets.");
 
             using Network dNetwork = new Network(false, 1337);
-            dNetwork.AddInputLater(trainingData[0].data.Length, trainingData[0].data.Length / 10);
-            //dNetwork.AddLayer(40);
-            //dNetwork.AddLayer(10);
+            dNetwork.AddInputLater(trainingData[0].data.Length, trainingData[0].data.Length);
+            dNetwork.AddLayer(trainingData[0].data.Length / 10);
+            dNetwork.AddLayer(20);
             dNetwork.AddLayer(trainingData[0].label.Length);
 
             Console.WriteLine("Networks Initalized");
 
-            float learningRate = 0.1f;
-            int numberOfEpochs = 50;
+            float learningRate = 0.8f;
+            int numberOfEpochs = 100;
 
             Stopwatch timer = Stopwatch.StartNew();
 
@@ -42,7 +42,7 @@ namespace ILGPU_ML.Mnist
 
             int[] testingIndecies = Utils.GenerateTrainingOrder(testData.Count);
             Random rng = new Random();
-            int testingBatchDivisor = 1;
+            int testingBatchDivisor = 20;
 
             for (int epoch = 0; epoch < numberOfEpochs; epoch++)
             {
