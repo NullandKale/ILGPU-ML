@@ -122,9 +122,9 @@ namespace ILGPU_ML.DataStructures
     {
         public long length;
         public long pointer;
-        public int size;
+        public long size;
 
-        public VirtualAllocation1D(int size, long length, long pointer)
+        public VirtualAllocation1D(long size, long length, long pointer)
         {
             this.length = length;
             this.size = size;
@@ -136,12 +136,12 @@ namespace ILGPU_ML.DataStructures
             return allocator.backingMemoryBuffer.SubView(pointer, size);
         }
 
-        public T Get(dVirtualMemory<T> allocator, int index)
+        public T Get(dVirtualMemory<T> allocator, long index)
         {
             return allocator.backingMemoryBuffer[pointer + index];
         }
 
-        public void Set(dVirtualMemory<T> allocator, int index, T val)
+        public void Set(dVirtualMemory<T> allocator, long index, T val)
         {
             allocator.backingMemoryBuffer[pointer + index] = val;
         }
@@ -171,9 +171,9 @@ namespace ILGPU_ML.DataStructures
             return allocator.backingMemoryBuffer.SubView(pointer, size.GetLength()).As2DDenseYView(size);
         }
 
-        public long GetIndex(int x, int y)
+        public long GetIndex(long x, long y)
         {
-            int index = 0;
+            long index = 0;
 
             if (Density == Stride.DenseY)
             {
@@ -187,12 +187,12 @@ namespace ILGPU_ML.DataStructures
             return index;
         }
 
-        public T Get(dVirtualMemory<T> allocator, int x, int y)
+        public T Get(dVirtualMemory<T> allocator, long x, long y)
         {
             return allocator.backingMemoryBuffer[pointer + GetIndex(x, y)];
         }
 
-        public void Set(dVirtualMemory<T> allocator, int x, int y, T val)
+        public void Set(dVirtualMemory<T> allocator, long x, long y, T val)
         {
             allocator.backingMemoryBuffer[pointer + GetIndex(x, y)] = val;
         }

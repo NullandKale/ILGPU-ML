@@ -23,7 +23,7 @@ namespace ILGPU_ML.DataStructures
 
         public long GetLength()
         {
-            return x * y;
+            return (long)x * (long)y;
         }
 
         public static Vec2i operator +(Vec2i v1, Vec2i v2)

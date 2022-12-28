@@ -28,7 +28,7 @@ namespace ILGPU_ML.VirtualMemory
         {
             if(data.Get(memory, index) != index + offset)
             {
-                Atomic.Add(ref invalidCount[0], 1);
+                Atomic.Exchange(ref invalidCount[0], index.X);
             }
         }
 
@@ -36,7 +36,7 @@ namespace ILGPU_ML.VirtualMemory
         {
             if (data.Get(memory, index.X, index.Y) != data.GetIndex(index.X, index.Y) + offset)
             {
-                Atomic.Add(ref invalidCount[0], 1);
+                Atomic.Exchange(ref invalidCount[0], data.GetIndex(index.X, index.Y));
             }
         }
 
@@ -49,15 +49,15 @@ namespace ILGPU_ML.VirtualMemory
 
         private static void Set(VirtualMemory<long> memory, VirtualAllocation1D<long> allocation)
         {
-            Set1DKernel(allocation.size, memory.GetD(), allocation, allocation.pointer);
+            Set1DKernel((int)allocation.size, memory.GetD(), allocation, allocation.pointer);
             device.Synchronize();
         }
 
         private static bool Check(VirtualMemory<long> memory, VirtualAllocation1D<long> allocation)
         {
-            MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(1);
+            MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(new long[]{ 0L});
 
-            Check1DKernel(allocation.size, memory.GetD(), allocation, error, allocation.pointer);
+            Check1DKernel((int)allocation.size, memory.GetD(), allocation, error, allocation.pointer);
             device.Synchronize();
 
             long errorCount = error.GetAsArray1D()[0];
@@ -80,7 +80,7 @@ namespace ILGPU_ML.VirtualMemory
 
         private static bool Check(VirtualMemory<long> memory, VirtualAllocation2D<long> allocation)
         {
-            MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(1);
+            MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(new long[] {0L});
 
             Check2DKernel(allocation.size, memory.GetD(), allocation, error, allocation.pointer);
             device.Synchronize();
@@ -101,10 +101,10 @@ namespace ILGPU_ML.VirtualMemory
         {
             bool debug = false;
             context = Context.Create(builder => builder.CPU().Cuda().EnableAlgorithms().Optimize(debug ? OptimizationLevel.Debug : OptimizationLevel.O1));
-            device = context.GetPreferredDevice(preferCPU: true)
+            device = context.GetPreferredDevice(preferCPU: false)
                                       .CreateAccelerator(context);
 
-            using VirtualMemory<long> memory = new VirtualMemory<long>(device, 1024L * 1024L * 1024L * 16L);
+            using VirtualMemory<long> memory = new VirtualMemory<long>(device, 1024L * 1024L * 1024L * 23L);
 
             Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long>(SetIndex1D);
             Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
