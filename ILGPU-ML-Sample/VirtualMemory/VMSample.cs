@@ -104,7 +104,7 @@ namespace ILGPU_ML.VirtualMemory
             device = context.GetPreferredDevice(preferCPU: false)
                                       .CreateAccelerator(context);
 
-            using VirtualMemory<long> memory = new VirtualMemory<long>(device, 1024L * 1024L * 1024L * 23L);
+            using VirtualMemory<long> memory = new VirtualMemory<long>(device, 0.95f);
 
             Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long>(SetIndex1D);
             Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
@@ -125,7 +125,7 @@ namespace ILGPU_ML.VirtualMemory
                 }
                 catch(Exception e) 
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                     break;
                 }
 
@@ -135,7 +135,7 @@ namespace ILGPU_ML.VirtualMemory
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                     break;
                 }
             }

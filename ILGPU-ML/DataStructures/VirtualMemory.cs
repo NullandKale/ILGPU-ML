@@ -177,11 +177,11 @@ namespace ILGPU_ML.DataStructures
 
             if (Density == Stride.DenseY)
             {
-                index = x * size.x + y;
+                index = x * size.y + y;
             }
             else if (Density == Stride.DenseX)
             {
-                index = y * size.y + x;
+                index = y * size.x + x;
             }
 
             return index;

@@ -17,7 +17,6 @@ namespace ILGPU_ML
             while (true)
             {
                 VMSample.Run();
-
             }
 
             //MatrixTestSample.Run();
