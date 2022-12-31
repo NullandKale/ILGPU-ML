@@ -5,6 +5,7 @@ using ILGPU.Runtime.Cuda;
 using ILGPU_ML.VirtualMemory;
 using ILGPU_ML.Mnist;
 using ILGPU_ML.MatrixTests;
+using System.Diagnostics;
 
 namespace ILGPU_ML
 {
@@ -12,14 +13,14 @@ namespace ILGPU_ML
     {
         static void Main(string[] args)
         {
+            AllocationTest.Run();
+            DeallocationTest.Run();
+            //CompleteTest.Run();
+
+            MatrixTestSample.Run();
+
             //XorNetwork.Run();
             //MnistNetwork.Run();
-            while (true)
-            {
-                VMSample.Run();
-            }
-
-            //MatrixTestSample.Run();
         }
     }
 }

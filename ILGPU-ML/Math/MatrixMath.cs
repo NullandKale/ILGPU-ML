@@ -72,64 +72,64 @@ namespace ILGPU_ML.Math
             MatrixDRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDReluKernel);
         }
 
-        public Matrix<float> AllocateMatrix(Vec2i size)
+        public HMatrix<float> AllocateMatrix(Vec2i size)
         {
-            return new Matrix<float>(data, size);
+            return new HMatrix<float>(data, size);
         }
 
-        public Vector<float> AllocateVector(int size)
+        public HVector<float> AllocateVector(int size)
         {
-            return new Vector<float>(data, size);
+            return new HVector<float>(data, size);
         }
 
-        public void MulInPlace(Matrix<float> matrix, float scalar) 
+        public void MulInPlace(HMatrix<float> matrix, float scalar) 
         {
-            InPlaceMul_M_F(matrix.data.size, data.GetD(), matrix, scalar);
+            InPlaceMul_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
         }
 
-        public void MulInPlace(Matrix<float> matrixA, Matrix<float> matrixB)
+        public void MulInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
         {
-            InPlaceElementWiseMul(matrixA.data.size, data.GetD(), matrixA, matrixB);
+            InPlaceElementWiseMul(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
         }
 
-        public void DivInPlace(Matrix<float> matrix, float scalar)
+        public void DivInPlace(HMatrix<float> matrix, float scalar)
         {
-            InPlaceDiv_M_F(matrix.data.size, data.GetD(), matrix, scalar);
+            InPlaceDiv_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
         }
 
-        public void DivInPlace(float scalar, Matrix<float> matrix)
+        public void DivInPlace(float scalar, HMatrix<float> matrix)
         {
-            InPlaceDiv_F_M(matrix.data.size, data.GetD(), scalar, matrix);
+            InPlaceDiv_F_M(matrix.Get().size, data.GetD(), scalar, matrix.Get());
         }
 
-        public void DivInPlace(Matrix<float> matrixA, Matrix<float> matrixB)
+        public void DivInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
         {
-            InPlaceElementWiseDiv(matrixA.data.size, data.GetD(), matrixA, matrixB);
+            InPlaceElementWiseDiv(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
         }
 
-        public void AddInPlace(Matrix<float> matrix, float scalar)
+        public void AddInPlace(HMatrix<float> matrix, float scalar)
         {
-            InPlaceAdd_M_F(matrix.data.size, data.GetD(), matrix, scalar);
+            InPlaceAdd_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
         }
 
-        public void AddInPlace(Matrix<float> matrixA, Matrix<float> matrixB)
+        public void AddInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
         {
-            InPlaceElementWiseAdd(matrixA.data.size, data.GetD(), matrixA, matrixB);
+            InPlaceElementWiseAdd(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
         }
 
-        public void SubInPlace(Matrix<float> matrix, float scalar)
+        public void SubInPlace(HMatrix<float> matrix, float scalar)
         {
-            InPlaceSub_M_F(matrix.data.size, data.GetD(), matrix, scalar);
+            InPlaceSub_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
         }
 
-        public void SubInPlace(float scalar, Matrix<float> matrix)
+        public void SubInPlace(float scalar, HMatrix<float> matrix)
         {
-            InPlaceSub_F_M(matrix.data.size, data.GetD(), scalar, matrix);
+            InPlaceSub_F_M(matrix.Get().size, data.GetD(), scalar, matrix.Get());
         }
 
-        public void SubInPlace(Matrix<float> matrixA, Matrix<float> matrixB)
+        public void SubInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
         {
-            InPlaceElementWiseSub(matrixA.data.size, data.GetD(), matrixA, matrixB);
+            InPlaceElementWiseSub(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
         }
     }
 }

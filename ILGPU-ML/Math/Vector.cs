@@ -7,21 +7,38 @@ using System.Threading.Tasks;
 
 namespace ILGPU_ML.Math
 {
+    public class HVector<T> : IDisposable where T : unmanaged
+    {
+        public HVirtualAllocation1D<T> allocation;
+        public Vector<T> data;
+
+        public HVector(VirtualMemory<T> memory, long size)
+        {
+            allocation = memory.Allocate1D(size);
+            data = new Vector<T>(allocation.Get());
+        }
+
+        public void Dispose()
+        {
+            allocation.Dispose();
+        }
+    }
+
     public struct Vector<T> where T : unmanaged
     {
         public VirtualAllocation1D<T> data;
 
-        public Vector(VirtualMemory<T> memory, int size)
+        public Vector(VirtualAllocation1D<T> data)
         {
-            data = memory.Allocate1D(size);
+            this.data = data;
         }
 
-        public T Get(dVirtualMemory<T> memory, int index)
+        public T Get(dVirtualMemory<T> memory, long index)
         {
             return data.Get(memory, index);
         }
 
-        public void Set(dVirtualMemory<T> memory, int index, T val)
+        public void Set(dVirtualMemory<T> memory, long index, T val)
         {
             data.Set(memory, index, val);
         }

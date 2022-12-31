@@ -100,12 +100,28 @@ namespace ILGPU_ML.Math
         public static void MatrixMulKernel(Index2D index, dVirtualMemory<float> data, Matrix<float> matrixA, Matrix<float> matrixB, Matrix<float> matrixC)
         {
             float sum = 0;
-            for (int k = 0; k < matrixA.data.size.y; k++)
+            for (int k = 0; k < matrixA.size.y; k++)
             {
                 float valA = matrixA.Get(data, index.X, k);
                 float valB = matrixB.Get(data, k, index.Y);
                 sum += valA * valB;
             }
+
+            matrixC.Set(data, index, sum);
+        }
+
+        public static void MatrixMulAddKernel(Index2D index, dVirtualMemory<float> data, Matrix<float> matrixA, Matrix<float> matrixB, Matrix<float> bias, Matrix<float> matrixC)
+        {
+            float sum = 0;
+            for (int k = 0; k < matrixA.size.y; k++)
+            {
+                float valA = matrixA.Get(data, index.X, k);
+                float valB = matrixB.Get(data, k, index.Y);
+                sum += valA * valB;
+            }
+
+            float valC = bias.Get(data, index.X, 0);
+            sum += valC;
 
             matrixC.Set(data, index, sum);
         }
