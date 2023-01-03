@@ -1,5 +1,7 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
+using ILGPU_ML.DataStructures;
+using ILGPU_ML.Math;
 using System.Diagnostics;
 
 namespace ILGPU_ML
@@ -83,15 +85,23 @@ namespace ILGPU_ML
         public float[] LayerBias;
         public float[] LayerError;
 
+        public MatrixMath math;
+        public HMatrix weightMatrix;
+        public HMatrix dataMatrix;
+        public HMatrix biasMatrix;
+        public HMatrix errorMatrix;
+
         public MemoryBuffer2D<float, Stride2D.DenseY> dLayerWeights;
         public MemoryBuffer1D<float, Stride1D.Dense> dLayerData;
         public MemoryBuffer1D<float, Stride1D.Dense> dLayerBias;
         public MemoryBuffer1D<float, Stride1D.Dense> dLayerError;
 
-        public Layer(int input, int size)
+        public Layer(MatrixMath math, int input, int size)
         {
             this.inputSize = input;
             this.layerSize = size;
+            this.math = math;
+
             LayerWeights = new float[input][];
                 
             for(int i = 0; i < input; i++)
@@ -100,9 +110,17 @@ namespace ILGPU_ML
             }
 
             LayerWeights2D = new float[input, size];
+            weightMatrix = math.AllocateMatrix(new Vec2i(size, 0));
+
             LayerData = new float[size];
+            dataMatrix = math.AllocateMatrix(new Vec2i(size, 0));
+
             LayerBias = new float[size];
+            biasMatrix = math.AllocateMatrix(new Vec2i(size, 0));
+
             LayerError = new float[size];
+            errorMatrix = math.AllocateMatrix(new Vec2i(size, 0));
+
         }
 
         public void InitDeviceBuffers(Accelerator device)
@@ -121,7 +139,6 @@ namespace ILGPU_ML
         public void CopyBackDeviceBuffers()
         {
             dLayerWeights.CopyToCPU(LayerWeights2D);
-            //LayerWeights = Utils.ToJaggedArray(dLayerWeights.GetAsArray2D());
             dLayerData.CopyToCPU(LayerData);
             dLayerBias.CopyToCPU(LayerBias);
             dLayerError.CopyToCPU(LayerError);
@@ -162,10 +179,48 @@ namespace ILGPU_ML
 
                 LayerData[j] = Utils.Activate(activation, activationMethod);
             }
+
+
+        }
+
+        public void ForwardPassMat(HMatrix trainingInput)
+        {
+            dataMatrix.Dispose();
+            dataMatrix = math.Mul(trainingInput, weightMatrix);
+            math.AddInPlace(dataMatrix, biasMatrix);
+            math.Sigmoid(dataMatrix);
+
+            //for (int j = 0; j < layerSize; j++)
+            //{
+            //    float activation = LayerBias[j];
+
+            //    for (int k = 0; k < inputSize; k++)
+            //    {
+            //        activation += trainingInput[k] * LayerWeights[k][j];
+            //    }
+
+            //    LayerData[j] = Utils.Activate(activation, activationMethod);
+            //}
+
+
         }
 
         public float[] BackwardPassCPU(float[] trainingOutput)
         {
+            for (int j = 0; j < layerSize; j++)
+            {
+                float error = (trainingOutput[j] - LayerData[j]);
+                LayerError[j] = error * Utils.dActivate(LayerData[j], activationMethod);
+            }
+
+            return LayerError;
+        }
+
+        public HMatrix BackwardPassCPU(HMatrix trainingOutput)
+        {
+            errorMatrix = trainingOutput;
+            math.SubInPlace(trainingOutput, dataMatrix);
+
             for (int j = 0; j < layerSize; j++)
             {
                 float error = (trainingOutput[j] - LayerData[j]);

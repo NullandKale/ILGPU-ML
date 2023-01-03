@@ -3,6 +3,7 @@ using ILGPU.IR.Analyses.ControlFlowDirection;
 using ILGPU.Runtime;
 using ILGPU.Runtime.CPU;
 using ILGPU.Runtime.Cuda;
+using ILGPU_ML.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,12 @@ namespace ILGPU_ML
     {
         public Context context;
         public Accelerator device;
+        public MatrixMath matMath;
 
         public List<Layer> layers;
 
+        private HMatrix inputMat;
+        private HMatrix outputMat;
         private MemoryBuffer1D<float, Stride1D.Dense> inputBuffer;
         private MemoryBuffer1D<float, Stride1D.Dense> outputBuffer;
 
@@ -42,6 +46,9 @@ namespace ILGPU_ML
             context = Context.Create(builder => builder.CPU().Cuda().EnableAlgorithms().Optimize(debug ? OptimizationLevel.Debug : OptimizationLevel.O1));
             device = context.GetPreferredDevice(preferCPU: debug)
                                       .CreateAccelerator(context);
+
+            matMath = new MatrixMath(context, device, 0.10f);
+
             layers = new List<Layer>();
 
             ForwardPassKernel = device.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, dLayer>(ForwardPass);
@@ -58,7 +65,7 @@ namespace ILGPU_ML
                 throw new Exception("Cannot allocate more than one input layers");
             }
 
-            Layer layer = new Layer(inputSize, layerSize);
+            Layer layer = new Layer(matMath, inputSize, layerSize);
             inputBuffer = device.Allocate1D<float>(inputSize);
             outputBuffer = device.Allocate1D<float>(layerSize);
 
@@ -75,7 +82,7 @@ namespace ILGPU_ML
                 throw new Exception("Must set an input layer first");
             }
 
-            Layer layer = new Layer(layers[layers.Count - 1].layerSize, size);
+            Layer layer = new Layer(matMath, layers[layers.Count - 1].layerSize, size);
             layer.Init(rng);
             layer.InitDeviceBuffers(device);
 

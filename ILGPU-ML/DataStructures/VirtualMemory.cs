@@ -305,6 +305,25 @@ namespace ILGPU_ML.DataStructures
             Deallocations = compressedDislocations;
         }
 
+        private ArrayView1D<T, Stride1D.Dense> GetSlice(long pointer, long length)
+        {
+            return backingMemoryBuffer.View.SubView(pointer, length);
+        }
+
+        public ArrayView1D<T, Stride1D.Dense> GetSlice(HVirtualAllocation1D<T> allocation)
+        {
+            long pointer = GetPointer(allocation.Get().id);
+            long length = allocation.Get().size;
+            return GetSlice(pointer, length);
+        }
+
+        public ArrayView2D<T, Stride2D.DenseY> GetSlice(HVirtualAllocation1D<T> allocation, Vec2i size)
+        {
+            long pointer = GetPointer(allocation.Get().id);
+            long length = allocation.Get().size;
+            return GetSlice(pointer, length).As2DDenseYView(size);
+        }
+
         private void Move(Allocation freeSpace, Allocation toMove)
         {
             long freeSpaceBeginning = GetPointer(freeSpace.id);
@@ -322,8 +341,8 @@ namespace ILGPU_ML.DataStructures
                 long length = XMath.Min(freeSpace.size, toMoveLeft);
 
                 // move the moveable space from the location of 
-                ArrayView1D<T, Stride1D.Dense> slice = backingMemoryBuffer.View.SubView(toMoveBeginning + totalMoved, length);
-                ArrayView1D<T, Stride1D.Dense> dest = backingMemoryBuffer.View.SubView(freeSpaceBeginning + totalMoved, length);
+                ArrayView1D<T, Stride1D.Dense> slice = GetSlice(toMoveBeginning + totalMoved, length);
+                ArrayView1D<T, Stride1D.Dense> dest = GetSlice(freeSpaceBeginning + totalMoved, length);
                 dest.CopyFrom(slice);    
                 
                 totalMoved += length;

@@ -39,13 +39,13 @@ namespace ILGPU_ML.Math
         private Context context;
         private Accelerator device;
 
-        private VirtualMemory<float> data;
+        private VirtualMemory<float> memory;
 
         public MatrixMath(Context context, Accelerator device, float maxMemoryPercent)
         {
             this.context = context;
             this.device = device;
-            data = new VirtualMemory<float>(device, maxMemoryPercent);
+            memory = new VirtualMemory<float>(device, maxMemoryPercent);
 
             InPlaceMul_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceMulKernel);
             InPlaceDiv_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceDivKernel);
@@ -72,64 +72,157 @@ namespace ILGPU_ML.Math
             MatrixDRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDReluKernel);
         }
 
-        public HMatrix<float> AllocateMatrix(Vec2i size)
+        public HMatrix AllocateMatrix(Vec2i size)
         {
-            return new HMatrix<float>(data, size);
+            return new HMatrix(memory, size);
         }
 
-        public HVector<float> AllocateVector(int size)
+        public HMatrix AllocateMatrix(Vec2i size, float[,] data)
         {
-            return new HVector<float>(data, size);
+            if(data.GetLength(0) != size.x || data.GetLength(1) != size.y)
+            {
+                throw new ArgumentOutOfRangeException("array size must match size");
+            }
+
+            HMatrix mat = new HMatrix(memory, size);
+
+            mat.GetArrayView().CopyFromCPU(data);
+
+            return mat;
         }
 
-        public void MulInPlace(HMatrix<float> matrix, float scalar) 
+        public void MulInPlace(HMatrix matrix, float scalar) 
         {
-            InPlaceMul_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
+            InPlaceMul_M_F(matrix.Get().size, memory.GetD(), matrix.Get(), scalar);
+            device.Synchronize();
         }
 
-        public void MulInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
+        public void MulInPlace(HMatrix matrixA, HMatrix matrixB)
         {
-            InPlaceElementWiseMul(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
+            InPlaceElementWiseMul(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get());
+            device.Synchronize();
         }
 
-        public void DivInPlace(HMatrix<float> matrix, float scalar)
+        public void DivInPlace(HMatrix matrix, float scalar)
         {
-            InPlaceDiv_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
+            InPlaceDiv_M_F(matrix.Get().size, memory.GetD(), matrix.Get(), scalar);
+            device.Synchronize();
         }
 
-        public void DivInPlace(float scalar, HMatrix<float> matrix)
+        public void DivInPlace(float scalar, HMatrix matrix)
         {
-            InPlaceDiv_F_M(matrix.Get().size, data.GetD(), scalar, matrix.Get());
+            InPlaceDiv_F_M(matrix.Get().size, memory.GetD(), scalar, matrix.Get());
+            device.Synchronize();
         }
 
-        public void DivInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
+        public void DivInPlace(HMatrix matrixA, HMatrix matrixB)
         {
-            InPlaceElementWiseDiv(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
+            InPlaceElementWiseDiv(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get());
+            device.Synchronize();
         }
 
-        public void AddInPlace(HMatrix<float> matrix, float scalar)
+        public void AddInPlace(HMatrix matrix, float scalar)
         {
-            InPlaceAdd_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
+            InPlaceAdd_M_F(matrix.Get().size, memory.GetD(), matrix.Get(), scalar);
+            device.Synchronize();
         }
 
-        public void AddInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
+        public void AddInPlace(HMatrix matrixA, HMatrix matrixB)
         {
-            InPlaceElementWiseAdd(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
+            InPlaceElementWiseAdd(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get());
+            device.Synchronize();
         }
 
-        public void SubInPlace(HMatrix<float> matrix, float scalar)
+        public void SubInPlace(HMatrix matrix, float scalar)
         {
-            InPlaceSub_M_F(matrix.Get().size, data.GetD(), matrix.Get(), scalar);
+            InPlaceSub_M_F(matrix.Get().size, memory.GetD(), matrix.Get(), scalar);
+            device.Synchronize();
         }
 
-        public void SubInPlace(float scalar, HMatrix<float> matrix)
+        public void SubInPlace(float scalar, HMatrix matrix)
         {
-            InPlaceSub_F_M(matrix.Get().size, data.GetD(), scalar, matrix.Get());
+            InPlaceSub_F_M(matrix.Get().size, memory.GetD(), scalar, matrix.Get());
+            device.Synchronize();
         }
 
-        public void SubInPlace(HMatrix<float> matrixA, HMatrix<float> matrixB)
+        public void SubInPlace(HMatrix matrixA, HMatrix matrixB)
         {
-            InPlaceElementWiseSub(matrixA.Get().size, data.GetD(), matrixA.Get(), matrixB.Get());
+            InPlaceElementWiseSub(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get());
+            device.Synchronize();
+        }
+
+        public HMatrix Mul(HMatrix matrixA, HMatrix matrixB)
+        {
+            HMatrix matrixC = AllocateMatrix(matrixA.Get().size);
+
+            ElementWiseMul(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get(), matrixC.Get());
+            device.Synchronize();
+
+            return matrixC;
+        }
+
+        public HMatrix Div(HMatrix matrixA, HMatrix matrixB)
+        {
+            HMatrix matrixC = AllocateMatrix(matrixA.Get().size);
+
+            ElementWiseDiv(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get(), matrixC.Get());
+            device.Synchronize();
+
+            return matrixC;
+        }
+
+        public HMatrix Add(HMatrix matrixA, HMatrix matrixB)
+        {
+            HMatrix matrixC = AllocateMatrix(matrixA.Get().size);
+
+            ElementWiseAdd(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get(), matrixC.Get());
+            device.Synchronize();
+
+            return matrixC;
+        }
+
+        public HMatrix Sub(HMatrix matrixA, HMatrix matrixB)
+        {
+            HMatrix matrixC = AllocateMatrix(matrixA.Get().size);
+
+            ElementWiseSub(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get(), matrixC.Get());
+            device.Synchronize();
+
+            return matrixC;
+        }
+
+        public HMatrix MatMul(HMatrix matrixA, HMatrix matrixB)
+        {
+            HMatrix matrixC = AllocateMatrix(matrixA.Get().size);
+
+            MatrixMul(matrixA.Get().size, memory.GetD(), matrixA.Get(), matrixB.Get(), matrixC.Get());
+            device.Synchronize();
+
+            return matrixC;
+        }
+
+        public void Sigmoid(HMatrix matrix)
+        {
+            MatrixSigmoid(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
+        }
+
+        public void dSigmoid(HMatrix matrix)
+        {
+            MatrixDSigmoid(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
+        }
+
+        public void Relu(HMatrix matrix)
+        {
+            MatrixRelu(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
+        }
+
+        public void dRelu(HMatrix matrix)
+        {
+            MatrixDRelu(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
         }
     }
 }

@@ -1,24 +1,48 @@
-﻿using ILGPU_ML.DataStructures;
+﻿using ILGPU;
+using ILGPU.Runtime;
+using ILGPU_ML.DataStructures;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ILGPU_ML.Math
 {
-    public class HMatrix<T> : IDisposable where T : unmanaged
+    public class HMatrix : IDisposable
     {
-        private HVirtualAllocation1D<T> allocation;
-        private Matrix<T> data;
+        private VirtualMemory<float> memory;
+        private HVirtualAllocation1D<float> allocation;
+        private Matrix<float> data;
 
-        public HMatrix(VirtualMemory<T> memory, Vec2i size)
+        public HMatrix(VirtualMemory<float> memory, Vec2i size)
         {
+            this.memory = memory;
             allocation = memory.Allocate1D(size.GetLength());
-            data = new Matrix<T>(allocation.Get(), size);
+            data = new Matrix<float>(allocation.Get(), size);
         }
 
-        public Matrix<T> Get()
+        public HMatrix(VirtualMemory<float> memory, HMatrix toCopy)
+        {
+            this.memory = memory;
+            allocation = memory.Allocate1D(toCopy.Get().size.GetLength());
+            memory.GetSlice(allocation).CopyFrom(memory.GetSlice(toCopy.allocation));
+            data = new Matrix<float>(allocation.Get(), toCopy.Get().size);
+        }
+
+        public ArrayView2D<float, Stride2D.DenseY> GetArrayView()
+        {
+            return memory.GetSlice(allocation, data.size);
+        }
+
+        public float[,] GetCPUData()
+        {
+            return GetArrayView().GetAsArray2D();
+        }
+
+        public Matrix<float> Get()
         {
             return data;
         }
@@ -27,6 +51,7 @@ namespace ILGPU_ML.Math
         {
             allocation.Dispose();
         }
+
     }
 
     public struct Matrix<T> where T : unmanaged
