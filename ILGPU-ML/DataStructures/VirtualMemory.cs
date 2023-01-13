@@ -336,7 +336,7 @@ namespace ILGPU_ML.DataStructures
                 toPrint += $"{Utils.FormatBytes((long)GetAllocationsData())}/s allocated.\n";
                 toPrint += $"{compactionData.compactionsPerSecond.ToString("0.00")} cps, {compactionData.averageCompactionTime.ToString("0.00")}s.\n";
                 toPrint += $"{compactionData.compactionTypes}\n";
-                toPrint += $"{maxPointers} max pointers\n";
+                toPrint += $"{maxPointers} max | {pointersArray.Length} allocated | {pointersCount} used\n";
                 toPrint += $"{Allocations.Count} Allocations | {Deallocations.Count} waiting for reclaimation.";
 
             }
