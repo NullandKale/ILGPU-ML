@@ -14,12 +14,12 @@ namespace ILGPU_ML.VirtualMemory
 {
     public static class AllocationTest
     {
-        private static void SetIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation1D<long> data, long offset)
+        private static void SetIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation<long> data, long offset)
         {
             data.Set(memory, index, index + offset);
         }
 
-        private static void CheckIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation1D<long> data, ArrayView1D<long, Stride1D.Dense> invalidCount, long offset)
+        private static void CheckIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation<long> data, ArrayView1D<long, Stride1D.Dense> invalidCount, long offset)
         {
             if(data.Get(memory, index) != index + offset)
             {
@@ -27,16 +27,16 @@ namespace ILGPU_ML.VirtualMemory
             }
         }
 
-        private static Action<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long> Set1DKernel;
-        private static Action<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long> Check1DKernel;
+        private static Action<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, long> Set1DKernel;
+        private static Action<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, ArrayView1D<long, Stride1D.Dense>, long> Check1DKernel;
 
-        private static void Set(Accelerator device, VirtualMemory<long> memory, VirtualAllocation1D<long> allocation)
+        private static void Set(Accelerator device, VirtualMemory<long> memory, VirtualAllocation<long> allocation)
         {
             Set1DKernel((int)allocation.size, memory.GetD(), allocation, memory.GetPointer(allocation.id));
             device.Synchronize();
         }
 
-        private static bool Check(Accelerator device, VirtualMemory<long> memory, VirtualAllocation1D<long> allocation)
+        private static bool Check(Accelerator device, VirtualMemory<long> memory, VirtualAllocation<long> allocation)
         {
             MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(new long[]{ 0L});
 
@@ -64,10 +64,10 @@ namespace ILGPU_ML.VirtualMemory
 
             using VirtualMemory<long> memory = new VirtualMemory<long>(device, 0.95f);
 
-            Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long>(SetIndex1D);
-            Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
+            Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, long>(SetIndex1D);
+            Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
 
-            List<HVirtualAllocation1D<long>> allocations1D = new List<HVirtualAllocation1D<long>>();
+            List<HVirtualAllocation<long>> allocations1D = new List<HVirtualAllocation<long>>();
 
             Random rng = new Random();
 

@@ -188,7 +188,7 @@ namespace ILGPU_ML
             dataMatrix.Dispose();
             dataMatrix = math.Mul(trainingInput, weightMatrix);
             math.AddInPlace(dataMatrix, biasMatrix);
-            math.Sigmoid(dataMatrix);
+            math.SigmoidInPlace(dataMatrix);
 
             //for (int j = 0; j < layerSize; j++)
             //{
@@ -220,14 +220,15 @@ namespace ILGPU_ML
         {
             errorMatrix = trainingOutput;
             math.SubInPlace(trainingOutput, dataMatrix);
+            return errorMatrix;
 
-            for (int j = 0; j < layerSize; j++)
-            {
-                float error = (trainingOutput[j] - LayerData[j]);
-                LayerError[j] = error * Utils.dActivate(LayerData[j], activationMethod);
-            }
+            //for (int j = 0; j < layerSize; j++)
+            //{
+            //    float error = (trainingOutput[j] - LayerData[j]);
+            //    LayerError[j] = error * Utils.dActivate(LayerData[j], activationMethod);
+            //}
 
-            return LayerError;
+            //return LayerError;
         }
 
         public float[] BackwardPassCPU(float[] trainingOutput, float[][] outputWeights)

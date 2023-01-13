@@ -10,7 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ILGPU_ML.Math
 {
-    public class MatrixMath
+    public class MatrixMath : IDisposable
     {
         private Action<Index2D, dVirtualMemory<float>, Matrix<float>, float> InPlaceMul_M_F;
         private Action<Index2D, dVirtualMemory<float>, Matrix<float>, float> InPlaceDiv_M_F;
@@ -39,7 +39,7 @@ namespace ILGPU_ML.Math
         private Context context;
         private Accelerator device;
 
-        private VirtualMemory<float> memory;
+        public VirtualMemory<float> memory;
 
         public MatrixMath(Context context, Accelerator device, float maxMemoryPercent)
         {
@@ -70,6 +70,42 @@ namespace ILGPU_ML.Math
             MatrixRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixReluKernel);
             MatrixDSigmoid = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDSigmoidKernel);
             MatrixDRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDReluKernel);
+        }
+
+        public MatrixMath(Context context, Accelerator device, long maxMemory)
+        {
+            this.context = context;
+            this.device = device;
+            memory = new VirtualMemory<float>(device, maxMemory);
+
+            InPlaceMul_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceMulKernel);
+            InPlaceDiv_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceDivKernel);
+            InPlaceDiv_F_M = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, float, Matrix<float>>(MatrixKernels.InPlaceDivKernel);
+            InPlaceAdd_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceAddKernel);
+            InPlaceSub_M_F = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, float>(MatrixKernels.InPlaceSubKernel);
+            InPlaceSub_F_M = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, float, Matrix<float>>(MatrixKernels.InPlaceSubKernel);
+
+            InPlaceElementWiseMul = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseMulKernel);
+            InPlaceElementWiseDiv = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseDivKernel);
+            InPlaceElementWiseAdd = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseAddKernel);
+            InPlaceElementWiseSub = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseSubKernel);
+
+            ElementWiseMul = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseMulKernel);
+            ElementWiseDiv = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseDivKernel);
+            ElementWiseAdd = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseAddKernel);
+            ElementWiseSub = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>, Matrix<float>>(MatrixKernels.ElementWiseSubKernel);
+
+            MatrixMul = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>, Matrix<float>, Matrix<float>>(MatrixKernels.MatrixMulKernel);
+
+            MatrixSigmoid = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixSigmoidKernel);
+            MatrixRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixReluKernel);
+            MatrixDSigmoid = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDSigmoidKernel);
+            MatrixDRelu = device.LoadAutoGroupedStreamKernel<Index2D, dVirtualMemory<float>, Matrix<float>>(MatrixKernels.MatrixDReluKernel);
+        }
+
+        ~MatrixMath()
+        {
+            Dispose();
         }
 
         public HMatrix AllocateMatrix(Vec2i size)
@@ -201,6 +237,18 @@ namespace ILGPU_ML.Math
             return matrixC;
         }
 
+        public void SigmoidInPlace(HMatrix matrix)
+        {
+            MatrixSigmoid(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
+        }
+
+        public void dSigmoidInPlace(HMatrix matrix)
+        {
+            MatrixDSigmoid(matrix.Get().size, memory.GetD(), matrix.Get());
+            device.Synchronize();
+        }
+
         public void Sigmoid(HMatrix matrix)
         {
             MatrixSigmoid(matrix.Get().size, memory.GetD(), matrix.Get());
@@ -213,16 +261,23 @@ namespace ILGPU_ML.Math
             device.Synchronize();
         }
 
-        public void Relu(HMatrix matrix)
+        public void ReluInPlace(HMatrix matrix)
         {
+            AllocateMatrix(matrix.Get().size);
+
             MatrixRelu(matrix.Get().size, memory.GetD(), matrix.Get());
             device.Synchronize();
         }
 
-        public void dRelu(HMatrix matrix)
+        public void dReluInPlace(HMatrix matrix)
         {
             MatrixDRelu(matrix.Get().size, memory.GetD(), matrix.Get());
             device.Synchronize();
+        }
+
+        public void Dispose()
+        {
+            memory.Dispose();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ILGPU_ML.Math
     public class HMatrix : IDisposable
     {
         private VirtualMemory<float> memory;
-        private HVirtualAllocation1D<float> allocation;
+        private HVirtualAllocation<float> allocation;
         private Matrix<float> data;
 
         public HMatrix(VirtualMemory<float> memory, Vec2i size)
@@ -30,6 +30,11 @@ namespace ILGPU_ML.Math
             allocation = memory.Allocate1D(toCopy.Get().size.GetLength());
             memory.GetSlice(allocation).CopyFrom(memory.GetSlice(toCopy.allocation));
             data = new Matrix<float>(allocation.Get(), toCopy.Get().size);
+        }
+
+        ~HMatrix()
+        {
+            Dispose();
         }
 
         public ArrayView2D<float, Stride2D.DenseY> GetArrayView()
@@ -56,11 +61,11 @@ namespace ILGPU_ML.Math
 
     public struct Matrix<T> where T : unmanaged
     {
-        public VirtualAllocation1D<T> data;
+        public VirtualAllocation<T> data;
         public int Density = Stride.DenseX;
         public Vec2i size;
 
-        public Matrix(VirtualAllocation1D<T> data, Vec2i size)
+        public Matrix(VirtualAllocation<T> data, Vec2i size)
         {
             this.size = size;
             this.data = data;

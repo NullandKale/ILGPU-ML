@@ -63,7 +63,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 1, 1 }, { 1, 1 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.AddInPlace(a, a);
 
@@ -71,7 +71,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix += Matrix Checked!");
+                //Console.WriteLine("Matrix += Matrix Checked!");
             }
             else
             {
@@ -84,7 +84,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 0, 0 }, { 0, 0 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.AddInPlace(a, 2);
 
@@ -92,7 +92,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix += Scalar Checked!");
+                //Console.WriteLine("Matrix += Scalar Checked!");
             }
             else
             {
@@ -105,7 +105,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 1, 1 }, { 1, 1 } };
             float[,] output = new float[,] { { 0, 0 }, { 0, 0 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.SubInPlace(a, a);
 
@@ -113,7 +113,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix -= Matrix Checked!");
+                //Console.WriteLine("Matrix -= Matrix Checked!");
             }
             else
             {
@@ -126,7 +126,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 4, 4 }, { 4, 4 } };
             float[,] output = new float[,] { { 0, 0 }, { 0, 0 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.SubInPlace(a, 4);
 
@@ -134,7 +134,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix -= Scalar Checked!");
+                //Console.WriteLine("Matrix -= Scalar Checked!");
             }
             else
             {
@@ -147,7 +147,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { {0, 0 }, { 0, 0 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.SubInPlace(2, a);
 
@@ -155,7 +155,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Scalar -= Matrix Checked!");
+                //Console.WriteLine("Scalar -= Matrix Checked!");
             }
             else
             {
@@ -168,7 +168,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { 4, 4 }, { 4, 4 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.MulInPlace(a, a);
 
@@ -176,7 +176,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix *= Matrix Checked!");
+                //Console.WriteLine("Matrix *= Matrix Checked!");
             }
             else
             {
@@ -189,7 +189,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 1, 1 }, { 1, 1 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.MulInPlace(a, 2);
 
@@ -197,7 +197,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix *= Scalar Checked!");
+                //Console.WriteLine("Matrix *= Scalar Checked!");
             }
             else
             {
@@ -210,7 +210,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 4, 4 }, { 2, 2 } };
             float[,] output = new float[,] { {1, 1 }, { 1, 1 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.DivInPlace(a, a);
 
@@ -218,7 +218,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix /= Matrix Checked!");
+                //Console.WriteLine("Matrix /= Matrix Checked!");
             }
             else
             {
@@ -231,7 +231,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 4, 4 }, { 4, 4 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.DivInPlace(a, 2);
 
@@ -239,7 +239,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix /= Scalar Checked!");
+                //Console.WriteLine("Matrix /= Scalar Checked!");
             }
             else
             {
@@ -252,7 +252,7 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { 5, 5 }, { 5, 5 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
             math.DivInPlace(10, a);
 
@@ -260,7 +260,7 @@ namespace ILGPU_ML.MatrixTests
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Scalar /= Matrix Checked!");
+                //Console.WriteLine("Scalar /= Matrix Checked!");
             }
             else
             {
@@ -274,16 +274,16 @@ namespace ILGPU_ML.MatrixTests
             float[,] inputB = new float[,] { { 3, 3 }, { 3, 3 } };
             float[,] output = new float[,] { { 5, 5 }, { 5, 5 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
-            using HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
+            HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
 
-            using HMatrix c = math.Add(a, b);
+            HMatrix c = math.Add(a, b);
 
             float[,] data = c.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Matrix + Matrix Checked!");
+                //Console.WriteLine("Matrix = Matrix + Matrix Checked!");
             }
             else
             {
@@ -297,16 +297,16 @@ namespace ILGPU_ML.MatrixTests
             float[,] inputB = new float[,] { { 3, 3 }, { 3, 3 } };
             float[,] output = new float[,] { { -1, -1 }, { -1, -1 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
-            using HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
+            HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
 
-            using HMatrix c = math.Sub(a, b);
+            HMatrix c = math.Sub(a, b);
 
             float[,] data = c.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Matrix - Matrix Checked!");
+                //Console.WriteLine("Matrix = Matrix - Matrix Checked!");
             }
             else
             {
@@ -320,16 +320,16 @@ namespace ILGPU_ML.MatrixTests
             float[,] inputB = new float[,] { { 3, 3 }, { 3, 3 } };
             float[,] output = new float[,] { { 6, 6 }, { 6, 6 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
-            using HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
+            HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
 
-            using HMatrix c = math.Mul(a, b);
+            HMatrix c = math.Mul(a, b);
 
             float[,] data = c.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Matrix * Matrix Checked!");
+                //Console.WriteLine("Matrix = Matrix * Matrix Checked!");
             }
             else
             {
@@ -343,16 +343,16 @@ namespace ILGPU_ML.MatrixTests
             float[,] inputB = new float[,] { { 3, 3 }, { 3, 3 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
-            using HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), inputA);
+            HMatrix b = math.AllocateMatrix(new Vec2i(2, 2), inputB);
 
-            using HMatrix c = math.Div(a, b);
+            HMatrix c = math.Div(a, b);
 
             float[,] data = c.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Matrix / Matrix Checked!");
+                //Console.WriteLine("Matrix = Matrix / Matrix Checked!");
             }
             else
             {
@@ -365,15 +365,15 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { 0.880797f, 0.880797f }, { 0.880797f, 0.880797f } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
-            math.Sigmoid(a);
+            math.SigmoidInPlace(a);
 
             float[,] data = a.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Sigmoid(Matrix) Checked!");
+                //Console.WriteLine("Matrix = Sigmoid(Matrix) Checked!");
             }
             else
             {
@@ -387,15 +387,15 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { -2, -2 }, { -2, -2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
-            math.dSigmoid(a);
+            math.dSigmoidInPlace(a);
 
             float[,] data = a.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = dSigmoid(Matrix) Checked!");
+                //Console.WriteLine("Matrix = dSigmoid(Matrix) Checked!");
             }
             else
             {
@@ -409,15 +409,15 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { 2, 2 }, { 2, 2 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
-            math.Relu(a);
+            math.ReluInPlace(a);
 
             float[,] data = a.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = Relu(Matrix) Checked!");
+                //Console.WriteLine("Matrix = Relu(Matrix) Checked!");
             }
             else
             {
@@ -431,15 +431,15 @@ namespace ILGPU_ML.MatrixTests
             float[,] input = new float[,] { { 2, 2 }, { 2, 2 } };
             float[,] output = new float[,] { { 1, 1 }, { 1, 1 } };
 
-            using HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
+            HMatrix a = math.AllocateMatrix(new Vec2i(2, 2), input);
 
-            math.dRelu(a);
+            math.dReluInPlace(a);
 
             float[,] data = a.GetCPUData();
 
             if (ArraysEqual(data, output))
             {
-                Console.WriteLine("Matrix = dRelu(Matrix) Checked!");
+                //Console.WriteLine("Matrix = dRelu(Matrix) Checked!");
             }
             else
             {
@@ -449,7 +449,7 @@ namespace ILGPU_ML.MatrixTests
         }
 
 
-        public static void Run()
+        public static void Run(int runs = 1)
         {
             bool debug = false;
             context = Context.Create(builder => builder.CPU().Cuda().EnableAlgorithms().Optimize(debug ? OptimizationLevel.Debug : OptimizationLevel.O1));
@@ -458,31 +458,85 @@ namespace ILGPU_ML.MatrixTests
 
             MatrixMath math = new MatrixMath(context, device, 0.95f);
 
-            CheckAddInPlace_M_M(math);
-            CheckAddInPlace_M_S(math);
-            CheckAdd(math);
+            Random rng = new Random();
 
-            CheckSubInPlace_M_M(math);
-            CheckSubInPlace_M_S(math);
-            CheckSubInPlace_S_M(math);
-            CheckSub(math);
+            for (int i = 0; i < runs; i++)
+            {
+                for(int j = 0; j < 100; j++)
+                {
+                    double random = rng.NextDouble();
 
-            CheckMulInPlace_M_M(math);
-            CheckMulInPlace_M_S(math);
-            CheckMul(math);
+                    HMatrix t;
 
-            CheckDivInPlace_M_M(math);
-            CheckDivInPlace_M_S(math);
-            CheckDivInPlace_S_M(math);
-            CheckDiv(math);
+                    if(random < 0.25)
+                    {
+                        t = math.AllocateMatrix(new Vec2i(5, 5));
+                    }
+                    else if(random < 0.5)
+                    {
+                        t = math.AllocateMatrix(new Vec2i(50, 50));
+                    }
+                    else if (random < 0.75)
+                    {
+                        t = math.AllocateMatrix(new Vec2i(500, 500));
+                    }
+                    else
+                    {
+                        t = math.AllocateMatrix(new Vec2i(5000, 5000));
+                    }
 
-            CheckSigmoid(math);
-            CheckdSigmoid(math);
+                    math.AddInPlace(t, i);
+                    t.Dispose();
+                }
 
-            CheckRelu(math);
-            CheckdRelu(math);
+                using var u0 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u1 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u2 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u3 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u4 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u5 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u6 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u7 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u8 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
+                using var u9 = math.AllocateMatrix(new Vec2i(3840 * 3, 2160));
 
-            Console.ReadLine();
+                math.AddInPlace(u0, 0);
+                math.AddInPlace(u1, 1);
+                math.AddInPlace(u2, 2);
+                math.AddInPlace(u3, 3);
+                math.AddInPlace(u4, 4);
+                math.AddInPlace(u5, 5);
+
+                CheckAddInPlace_M_M(math);
+                CheckAddInPlace_M_S(math);
+                CheckAdd(math);
+
+                CheckSubInPlace_M_M(math);
+                CheckSubInPlace_M_S(math);
+                CheckSubInPlace_S_M(math);
+                CheckSub(math);
+
+                CheckMulInPlace_M_M(math);
+                CheckMulInPlace_M_S(math);
+                CheckMul(math);
+
+                CheckDivInPlace_M_M(math);
+                CheckDivInPlace_M_S(math);
+                CheckDivInPlace_S_M(math);
+                CheckDiv(math);
+
+                CheckSigmoid(math);
+                CheckdSigmoid(math);
+
+                CheckRelu(math);
+                CheckdRelu(math);
+
+                if (i % 100 == 0)
+                {
+                    math.memory.PrintStats(i.ToString());
+                }
+            }
+
         }
     }
 }

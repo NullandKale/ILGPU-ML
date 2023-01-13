@@ -18,10 +18,10 @@ namespace ILGPU_ML
             //DeallocationTest.Run();
             //CompleteTest.Run();
 
-            //MatrixTestSample.Run();
+            MatrixTestSample.Run(int.MaxValue);
 
             //XorNetwork.Run();
-            MnistNetwork.Run();
+            //MnistNetwork.Run();
         }
     }
 }

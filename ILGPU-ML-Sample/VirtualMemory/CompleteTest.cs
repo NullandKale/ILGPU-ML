@@ -36,10 +36,10 @@ namespace ILGPU_ML.VirtualMemory
         private VirtualMemory<long> memory;
         private Random rng;
 
-        private List<HVirtualAllocation1D<long>> allocations;
+        private List<HVirtualAllocation<long>> allocations;
 
-        private Action<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long> Set1DKernel;
-        private Action<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long> Check1DKernel;
+        private Action<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, long> Set1DKernel;
+        private Action<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, ArrayView1D<long, Stride1D.Dense>, long> Check1DKernel;
 
         public CompleteTest()
         {
@@ -49,12 +49,12 @@ namespace ILGPU_ML.VirtualMemory
                                       .CreateAccelerator(context);
 
             rng = new Random(1);
-            allocations = new List<HVirtualAllocation1D<long>>();
+            allocations = new List<HVirtualAllocation<long>>();
 
             memory = new VirtualMemory<long>(device, 0.95f);
 
-            Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, long>(SetIndex1D);
-            Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation1D<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
+            Set1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, long>(SetIndex1D);
+            Check1DKernel = device.LoadAutoGroupedStreamKernel<Index1D, dVirtualMemory<long>, VirtualAllocation<long>, ArrayView1D<long, Stride1D.Dense>, long>(CheckIndex1D);
         }
 
         public void Test(int percent)
@@ -119,7 +119,7 @@ namespace ILGPU_ML.VirtualMemory
             try
             {
                 //                                                                 1 b to 100MB
-                HVirtualAllocation1D<long> allocation = memory.Allocate1D(rng.Next(1, 1024 * 1024 * 100 / 8));
+                HVirtualAllocation<long> allocation = memory.Allocate1D(rng.Next(1, 1024 * 1024 * 100 / 8));
                 allocations.Add(allocation);
                 return true;
             }
@@ -149,7 +149,7 @@ namespace ILGPU_ML.VirtualMemory
             }
         }
 
-        public bool TestAllocation(HVirtualAllocation1D<long> allocation)
+        public bool TestAllocation(HVirtualAllocation<long> allocation)
         {
             Set(allocation);
             return Check(allocation);
@@ -188,12 +188,12 @@ namespace ILGPU_ML.VirtualMemory
             }
         }
 
-        private static void SetIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation1D<long> data, long offset)
+        private static void SetIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation<long> data, long offset)
         {
             data.Set(memory, index, data.id);
         }
 
-        private static void CheckIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation1D<long> data, ArrayView1D<long, Stride1D.Dense> invalidCount, long offset)
+        private static void CheckIndex1D(Index1D index, dVirtualMemory<long> memory, VirtualAllocation<long> data, ArrayView1D<long, Stride1D.Dense> invalidCount, long offset)
         {
             if (data.Get(memory, index) != data.id)
             {
@@ -201,13 +201,13 @@ namespace ILGPU_ML.VirtualMemory
             }
         }
 
-        private void Set(HVirtualAllocation1D<long> allocation)
+        private void Set(HVirtualAllocation<long> allocation)
         {
             Set1DKernel((int)allocation.Get().size, memory.GetD(), allocation.Get(), memory.GetPointer(allocation.Get().id));
             device.Synchronize();
         }
 
-        private bool Check(HVirtualAllocation1D<long> allocation)
+        private bool Check(HVirtualAllocation<long> allocation)
         {
             using MemoryBuffer1D<long, Stride1D.Dense> error = device.Allocate1D<long>(new long[] { 0L });
 
